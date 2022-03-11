@@ -96,6 +96,21 @@ public class BaseActor extends Actor {
         boundaryPolygon = new Polygon(vertices);
     }
 
+    public Vector2 preventOverlap(BaseActor other){
+        Polygon poly1 = this.getBoundaryPolygon();
+        Polygon poly2 = other.getBoundaryPolygon();
+
+        if(!poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle()))
+            return null;
+        Intersector.MinimumTranslationVector mtv = new Intersector.MinimumTranslationVector();
+        boolean polygonOverlap = Intersector.overlapConvexPolygons(poly1, poly2, mtv);
+
+        if(!polygonOverlap)
+            return null;
+        this.moveBy(mtv.normal.x, mtv.normal.y);
+        return mtv.normal;
+    }
+
     public void setBoundaryPolygon(int numSides) {
         float w = getWidth();
         float h = getHeight();
