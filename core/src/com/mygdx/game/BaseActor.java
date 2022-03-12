@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.ArrayList;
+
 /**
  * Extend the Actor class to include graphics and collision detection.
  * Actor class stores data such as position and rotation.
@@ -22,6 +24,7 @@ public class BaseActor extends Actor {
     private Vector2 velocityVec, accelerateVec;
     private float acceleration, maxSpeed, deceleration;
     private Polygon boundaryPolygon;
+    ArrayList<BaseActor> list;
 
 
     public BaseActor(float x, float y, Stage s) {
@@ -77,6 +80,21 @@ public class BaseActor extends Actor {
         return Intersector.overlapConvexPolygons(poly1, poly2);
     }
 
+    public ArrayList<BaseActor> getList(Stage stage, String className){
+        list = new ArrayList<>();
+        Class theClass = null;
+        try{
+            theClass = Class.forName(className);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        for(Actor actor : stage.getActors()){
+            if(theClass.isInstance(actor)){ list.add((BaseActor) actor);
+            }
+        }
+        return list;
+    }
+
     public void centerAtPosition(float x, float y){
         setPosition(x - getWidth()/2, y - getHeight()/2);
     }
@@ -102,6 +120,7 @@ public class BaseActor extends Actor {
 
         if(!poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle()))
             return null;
+
         Intersector.MinimumTranslationVector mtv = new Intersector.MinimumTranslationVector();
         boolean polygonOverlap = Intersector.overlapConvexPolygons(poly1, poly2, mtv);
 
