@@ -24,7 +24,6 @@ public class BaseActor extends Actor {
     private Vector2 velocityVec, accelerateVec;
     private float acceleration, maxSpeed, deceleration;
     private Polygon boundaryPolygon;
-    ArrayList<BaseActor> list;
 
 
     public BaseActor(float x, float y, Stage s) {
@@ -80,8 +79,8 @@ public class BaseActor extends Actor {
         return Intersector.overlapConvexPolygons(poly1, poly2);
     }
 
-    public ArrayList<BaseActor> getList(Stage stage, String className){
-        list = new ArrayList<>();
+    public static  ArrayList<BaseActor> getList(Stage stage, String className){
+        ArrayList<BaseActor> list = new ArrayList<>();
         Class theClass = null;
         try{
             theClass = Class.forName(className);
@@ -93,6 +92,10 @@ public class BaseActor extends Actor {
             }
         }
         return list;
+    }
+
+    public static int getCountOfActor(Stage stage, String className){
+        return getList(stage, className).size();
     }
 
     public void centerAtPosition(float x, float y){
