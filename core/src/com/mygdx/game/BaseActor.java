@@ -13,10 +13,6 @@ import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
 
-/**
- * Extend the Actor class to include graphics and collision detection.
- * Actor class stores data such as position and rotation.
- */
 public class BaseActor extends Actor {
     private Animation<TextureRegion> animation;
     private float elapsedTime;
@@ -24,6 +20,7 @@ public class BaseActor extends Actor {
     private Vector2 velocityVec, accelerateVec;
     private float acceleration, maxSpeed, deceleration;
     private Polygon boundaryPolygon;
+    private static Rectangle worldBound;
 
 
     public BaseActor(float x, float y, Stage s) {
@@ -82,13 +79,17 @@ public class BaseActor extends Actor {
     public static  ArrayList<BaseActor> getList(Stage stage, String className){
         ArrayList<BaseActor> list = new ArrayList<>();
         Class theClass = null;
+
         try{
             theClass = Class.forName(className);
         }catch (Exception e){
             e.printStackTrace();
+
         }
+
         for(Actor actor : stage.getActors()){
-            if(theClass.isInstance(actor)){ list.add((BaseActor) actor);
+            if(theClass.isInstance(actor)){
+                list.add((BaseActor) actor);
             }
         }
         return list;
@@ -286,6 +287,29 @@ public class BaseActor extends Actor {
 
     public boolean isAnimationFinished() {
         return animation.isAnimationFinished(elapsedTime);
+    }
+
+    public static void setWorldBound(float width, float height){
+        worldBound = new Rectangle(0,0,width, height);
+    }
+
+    public static void setWorldBound(BaseActor ba){
+        setWorldBound(ba.getWidth(), ba.getHeight());
+    }
+
+    public void boundToWorld(){
+        if(getX() < 0)
+            setX(0);
+
+        if(getX() + getWidth() > worldBound.getWidth())
+            setX(worldBound.getWidth() - getWidth());
+
+        if(getY() < 0)
+            setY(0);
+
+        if(getY() + getHeight() > worldBound.getHeight())
+            setY(worldBound.getHeight() - getHeight());
+
     }
 
     public void draw(Batch batch, float parentAlpha) {

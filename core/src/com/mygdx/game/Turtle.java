@@ -43,6 +43,8 @@ public class Turtle extends BaseActor
             setRotation(getMotionAngle());
         }
 
+        boundToWorld();
+
     }
 
 }
