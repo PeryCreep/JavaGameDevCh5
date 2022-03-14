@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
 
@@ -66,48 +68,48 @@ public class BaseActor extends Actor {
         }
     }
 
-    public boolean overlaps(BaseActor other){
+    public boolean overlaps(BaseActor other) {
         Polygon poly1 = this.getBoundaryPolygon();
         Polygon poly2 = other.getBoundaryPolygon();
 
-        if(!poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle()))
+        if (!poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle()))
             return false;
 
         return Intersector.overlapConvexPolygons(poly1, poly2);
     }
 
-    public static  ArrayList<BaseActor> getList(Stage stage, String className){
+    public static ArrayList<BaseActor> getList(Stage stage, String className) {
         ArrayList<BaseActor> list = new ArrayList<>();
         Class theClass = null;
 
-        try{
+        try {
             theClass = Class.forName(className);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
 
         }
 
-        for(Actor actor : stage.getActors()){
-            if(theClass.isInstance(actor)){
+        for (Actor actor : stage.getActors()) {
+            if (theClass.isInstance(actor)) {
                 list.add((BaseActor) actor);
             }
         }
         return list;
     }
 
-    public static int getCountOfActor(Stage stage, String className){
+    public static int getCountOfActor(Stage stage, String className) {
         return getList(stage, className).size();
     }
 
-    public void centerAtPosition(float x, float y){
-        setPosition(x - getWidth()/2, y - getHeight()/2);
+    public void centerAtPosition(float x, float y) {
+        setPosition(x - getWidth() / 2, y - getHeight() / 2);
     }
 
-    public void centerAtActor(BaseActor actor){
-        centerAtPosition(actor.getX() + actor.getWidth()/2, actor.getY() + actor.getHeight()/2);
+    public void centerAtActor(BaseActor actor) {
+        centerAtPosition(actor.getX() + actor.getWidth() / 2, actor.getY() + actor.getHeight() / 2);
     }
 
-    public void setOpacity(float opacity){
+    public void setOpacity(float opacity) {
         this.getColor().a = opacity;
     }
 
@@ -118,17 +120,17 @@ public class BaseActor extends Actor {
         boundaryPolygon = new Polygon(vertices);
     }
 
-    public Vector2 preventOverlap(BaseActor other){
+    public Vector2 preventOverlap(BaseActor other) {
         Polygon poly1 = this.getBoundaryPolygon();
         Polygon poly2 = other.getBoundaryPolygon();
 
-        if(!poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle()))
+        if (!poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle()))
             return null;
 
         Intersector.MinimumTranslationVector mtv = new Intersector.MinimumTranslationVector();
         boolean polygonOverlap = Intersector.overlapConvexPolygons(poly1, poly2, mtv);
 
-        if(!polygonOverlap)
+        if (!polygonOverlap)
             return null;
         this.moveBy(mtv.normal.x, mtv.normal.y);
         return mtv.normal;
@@ -289,27 +291,39 @@ public class BaseActor extends Actor {
         return animation.isAnimationFinished(elapsedTime);
     }
 
-    public static void setWorldBound(float width, float height){
-        worldBound = new Rectangle(0,0,width, height);
+    public static void setWorldBound(float width, float height) {
+        worldBound = new Rectangle(0, 0, width, height);
     }
 
-    public static void setWorldBound(BaseActor ba){
+    public static void setWorldBound(BaseActor ba) {
         setWorldBound(ba.getWidth(), ba.getHeight());
     }
 
-    public void boundToWorld(){
-        if(getX() < 0)
+    public void boundToWorld() {
+        if (getX() < 0)
             setX(0);
 
-        if(getX() + getWidth() > worldBound.getWidth())
-            setX(worldBound.getWidth() - getWidth());
+        if (getX() + getWidth() > worldBound.width)
+            setX(worldBound.width - getWidth());
 
-        if(getY() < 0)
+        if (getY() < 0)
             setY(0);
 
-        if(getY() + getHeight() > worldBound.getHeight())
-            setY(worldBound.getHeight() - getHeight());
+        if (getY() + getHeight() > worldBound.height)
+            setY(worldBound.height - getHeight());
 
+    }
+
+    public void setCameraAtActor() {
+        Camera cam = getStage().getCamera();
+        Viewport vp = getStage().getViewport();
+
+        cam.position.set(this.getX() + this.getOriginX(), this.getY() + this.getOriginY(), 0);
+
+        cam.position.x = MathUtils.clamp(cam.position.x, cam.viewportWidth/2,  worldBound.width -cam.viewportWidth/2);
+        cam.position.y = MathUtils.clamp(cam.position.y, cam.viewportHeight/2,  worldBound.height -cam.viewportHeight/2);
+
+        cam.update();
     }
 
     public void draw(Batch batch, float parentAlpha) {
