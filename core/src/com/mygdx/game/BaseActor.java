@@ -9,13 +9,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
 
-public class BaseActor extends Actor {
+public class BaseActor extends Group  {
     private Animation<TextureRegion> animation;
     private float elapsedTime;
     private boolean animationPaused;
@@ -324,6 +325,20 @@ public class BaseActor extends Actor {
         cam.position.y = MathUtils.clamp(cam.position.y, cam.viewportHeight/2,  worldBound.height -cam.viewportHeight/2);
 
         cam.update();
+    }
+
+    public boolean isWithinDistance(float distance, BaseActor other){
+        Polygon poly1 = this.getBoundaryPolygon();
+        float scaleX = (this.getWidth() + 2 * distance) / this.getWidth();
+        float scaleY = (this.getHeight() + 2 * distance) / this.getHeight();
+        poly1.setScale(scaleX, scaleY);
+
+        Polygon poly2 = other.getBoundaryPolygon();
+
+        if(!poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle()))
+            return false;
+
+        return Intersector.overlapConvexPolygons(poly1, poly2);
     }
 
     public void draw(Batch batch, float parentAlpha) {
